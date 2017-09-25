@@ -5,6 +5,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.Scanner;
 
 public class TelematicsService extends VehicleInfo {
 
@@ -53,22 +54,25 @@ public class TelematicsService extends VehicleInfo {
                     allEngineSize += vi.getEngineSizeLiters();
 
                     //build HTML table data
-                    String tempTableData = VehicleInfo.HTML_DASH_TABLEDATA;
-                    addTableDataHTML += tempTableData.replace("{{thisVIN}}", vi.getVIN()) + tempTableData.replace("{{thisOdometer}}", vi.getVIN()) + tempTableData.replace("{{thisFuelConsumption}}", Double.toString(vi.getConsumptionGalGas())) + tempTableData.replace("{{thisOilChngMileage}}", Double.toString(vi.getOdometerLastOilChange())) + tempTableData.replace("{{thisEngineSize}}", Double.toString(vi.getEngineSizeLiters()));
+                    String tempTable = addTableHTML(VehicleInfo.HTML_DASH_TABLEDATA, vi.getVIN(), vi.getOdometer(), vi.getConsumptionGalGas(), vi.getOdometerLastOilChange(), vi.getEngineSizeLiters());
+
+                    addTableDataHTML += tempTable;
 
                 } catch (IOException ex) {
                     ex.printStackTrace(); }
             }//end if
         }//end forEach loop
 
-        String avgOdometer = Double.toString(allOdometer/jsonCount);
-        String avgFuelConsumption = Double.toString(allFuelConsumption/jsonCount);
-        String avgOilChngMileage = Double.toString(allOilChngMileage/jsonCount);
-        String avgEngineSize = Double.toString(allEngineSize/jsonCount);
+        String avgOdometer = calcAvg(allOdometer, jsonCount);
+        String avgFuelConsumption = calcAvg(allFuelConsumption, jsonCount);
+        String avgOilChngMileage = calcAvg(allOilChngMileage, jsonCount);
+        String avgEngineSize = calcAvg(allEngineSize, jsonCount);
         String count = Integer.toString(jsonCount);
 
-        String HTMLDashboard = addAvgsHTML_UPPER(VehicleInfo.HTML_DASH_UPPER, count, avgOdometer, avgFuelConsumption, avgOilChngMileage, avgEngineSize) + addTableDataHTML + VehicleInfo.HTML_DASH_LOWER;
+        //builds whole dashboard
+        String HTMLDashboard = addAvgsHTML_UPPER(VehicleInfo.HTML_DASH_UPPER, count, avgOdometer, avgFuelConsumption, avgOilChngMileage, avgEngineSize) + addTableDataHTML;
 
+        //write dashboard.html file
         try {
             File htmlFile = new File("dashboard.html");
             FileWriter newFile = new FileWriter(htmlFile);
@@ -80,15 +84,33 @@ public class TelematicsService extends VehicleInfo {
 
     }//end report method
 
+//CALCULATION METHODS
+
 public static String addAvgsHTML_UPPER ( String template, String jsonCount, String avgOdometer, String avgFuelConsumption, String avgOilChngMileage, String avgEngineSize) {
-    String upperHTML = "";
-    upperHTML = template.replace("{{fleetCount}}", jsonCount);
-    upperHTML += template.replace("{{avgOdometer}}", avgOdometer);
-    upperHTML += template.replace("{{avgFuelConsumption}}", avgFuelConsumption);
-    upperHTML += template.replace("{{avgOilChngMileage}}", avgOilChngMileage);
-    upperHTML += template.replace("{avgEngineSize}}", avgEngineSize);
+    String upperHTML = template.replace("{{count}}", jsonCount);
+    upperHTML = upperHTML.replace("{{avgOdo}}", avgOdometer);
+    upperHTML = upperHTML.replace("{{avgCons}}", avgFuelConsumption);
+    upperHTML = upperHTML.replace("{{avgLastOil}}", avgOilChngMileage);
+    upperHTML = upperHTML.replace("{{avgEngSize}}", avgEngineSize);
     return upperHTML;
 }
+
+public static String calcAvg(Double numerator, int count) {
+    Double temp = numerator/count;
+    Double rounded = Math.round(temp * 10d)/10d;
+    return Double.toString(rounded);
+}
+
+public static String addTableHTML(String template, String vin, double odometer, double consumption, double lastOilChng, double engineSize) {
+        String html = template.replace("{{vin}}", vin);
+        html = html.replace("{{odo}}", Double.toString(odometer));
+        html = html.replace("{{fuelCons}}", Double.toString(consumption));
+        html = html.replace("{{lastOil}}", Double.toString(lastOilChng));
+        html = html.replace("{{engSize}}", Double.toString(engineSize));
+        return html;
+}
+
+
 
 }//end class TelematicsService
 
