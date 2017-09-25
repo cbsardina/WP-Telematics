@@ -19,31 +19,16 @@ public class Main {
         System.out.println("Enter your engine size in Liters: ");
             double userEngineSizeLiters = scanner.nextDouble();
 
-        VehicleInfo user1 = new VehicleInfo();
+        VehicleInfo user = new VehicleInfo();
 
-        user1.setVIN(userVIN);
-        user1.setOdometer(userOdometer);
-        user1.setConsumptionGalGas(userConsumptionGalGas);
-        user1.setOdometerLastOilChange(userOdometerLastOilChange);
-        user1.setEngineSizeLiters(userEngineSizeLiters);
-
-//
-//        System.out.println(user1.getVIN());
-//        System.out.println(user1.getOdometer());
-//        System.out.println(user1.getConsumptionGalGas());
-//        System.out.println(user1.getOdometerLastOilChange());
-//        System.out.println(user1.getEngineSizeLiters());
-//        System.out.println("-----------------------------");
-//        System.out.println(" ");
-//
-//        System.out.println(user1.VIN);
-//        System.out.println(user1.odometer);
-//        System.out.println(user1.consumptionGalGas);
-//        System.out.println(user1.odometerLastOilChange);
-//        System.out.println(user1.engineSizeLiters);
+        user.setVIN(userVIN);
+        user.setOdometer(userOdometer);
+        user.setConsumptionGalGas(userConsumptionGalGas);
+        user.setOdometerLastOilChange(userOdometerLastOilChange);
+        user.setEngineSizeLiters(userEngineSizeLiters);
 
         TelematicsService teleReport = new TelematicsService();
-        teleReport.report(user1);
+        teleReport.report(user);
 
 
     }

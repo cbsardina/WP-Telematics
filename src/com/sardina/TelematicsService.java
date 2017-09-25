@@ -5,7 +5,6 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.Scanner;
 
 public class TelematicsService extends VehicleInfo {
 
@@ -28,25 +27,20 @@ public class TelematicsService extends VehicleInfo {
             newFile.close();
         } catch (IOException ex) {
             ex.printStackTrace(); }
-        //1. write the Vehicle info to a file as json
-            //VIN is file name eg. 66783jf9.json
-                // file overwrites existing files for the same VIN
-        //2. find all the files that end w/".json" and convert back to a VehicleInfo object
-        //3. update a dashboard.html
 
-      //find .json files
-        File file = new File(".");
+      //find .json files, get data for averages, build table html
         int jsonCount = 0;
         double allOdometer = 0;
         double allFuelConsumption = 0;
         double allOilChngMileage = 0;
         double allEngineSize = 0;
-        String addTableDataHTML = "";
+        String addTableDataHTML = "";       //this is the complete tale data to be concatenated
+
+        File file = new File(".");
         for (File f : file.listFiles()) {
             if (f.getName().endsWith(".json")) {
                 jsonCount++;
-                // Now you have a File object named "f".
-                // You can use this to create a new instance of Scanner
+
                 try {
                     //JSON to Java Object
                     ObjectMapper mapper = new ObjectMapper();
@@ -58,22 +52,31 @@ public class TelematicsService extends VehicleInfo {
                     allOilChngMileage += vi.getOdometerLastOilChange();
                     allEngineSize += vi.getEngineSizeLiters();
 
+                    //build HTML table data
                     String tempTableData = VehicleInfo.HTML_DASH_TABLEDATA;
                     addTableDataHTML += tempTableData.replace("{{thisVIN}}", vi.getVIN()) + tempTableData.replace("{{thisOdometer}}", vi.getVIN()) + tempTableData.replace("{{thisFuelConsumption}}", Double.toString(vi.getConsumptionGalGas())) + tempTableData.replace("{{thisOilChngMileage}}", Double.toString(vi.getOdometerLastOilChange())) + tempTableData.replace("{{thisEngineSize}}", Double.toString(vi.getEngineSizeLiters()));
-
-
-                    //✳️ ** +++++ PICK UP HERE +++++ ** ✳️
-
 
                 } catch (IOException ex) {
                     ex.printStackTrace(); }
             }//end if
         }//end forEach loop
+
         String avgOdometer = Double.toString(allOdometer/jsonCount);
         String avgFuelConsumption = Double.toString(allFuelConsumption/jsonCount);
         String avgOilChngMileage = Double.toString(allOilChngMileage/jsonCount);
         String avgEngineSize = Double.toString(allEngineSize/jsonCount);
         String count = Integer.toString(jsonCount);
+
+        String HTMLDashboard = addAvgsHTML_UPPER(VehicleInfo.HTML_DASH_UPPER, count, avgOdometer, avgFuelConsumption, avgOilChngMileage, avgEngineSize) + addTableDataHTML + VehicleInfo.HTML_DASH_LOWER;
+
+        try {
+            File htmlFile = new File("dashboard.html");
+            FileWriter newFile = new FileWriter(htmlFile);
+
+            newFile.write(HTMLDashboard);
+            newFile.close();
+        } catch (IOException ex) {
+            ex.printStackTrace(); }
 
     }//end report method
 
